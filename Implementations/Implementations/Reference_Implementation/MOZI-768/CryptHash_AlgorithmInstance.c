@@ -148,8 +148,8 @@ void permutation(unsigned char *state, int roundNum){
 /// @return 0 for success, 1 for error
 int hash_Fsponge(int hash, int rate, const unsigned char *input, ULL input_len_bits, int output_len_bits, unsigned char *output){
     if (rate != 152 || hash != 96){
-        printf("Invalid rate or hash length\n");
-        return 1;
+        //printf("Invalid rate or hash length\n");
+        return -1;
     }
     unsigned char state[256];
     unsigned char IV[256];
@@ -160,6 +160,9 @@ int hash_Fsponge(int hash, int rate, const unsigned char *input, ULL input_len_b
     ULL padded_input_len_bits = ((input_len_bits + rate*8) / (rate*8)) * rate*8;
     ULL padded_input_len = padded_input_len_bits / 8;
     unsigned char *padded_input = (unsigned char *)malloc(padded_input_len);
+    if (padded_input == NULL) {
+        return -1;
+    }
     memset(padded_input, 0, padded_input_len);
     ULL full_bytes = input_len_bits / 8;
     int remaining_bits = input_len_bits % 8;
@@ -193,10 +196,14 @@ int hash_Fsponge(int hash, int rate, const unsigned char *input, ULL input_len_b
     for (int i = 0; i < hash; i ++){
         output[i] = state[256 - hash + i];
     }
+    free(padded_input);
     return 0;
 }
 
 int CryptHash(int digest_len_bits, const unsigned char *msg, unsigned long long msg_len_bits, unsigned char *digest)
 {
+    if(digest_len_bits != DIGEST_BIT_LENGTH) {
+        return -1;
+    }
     return hash_Fsponge(digest_len_bits / 8, 152, msg, msg_len_bits, digest_len_bits, digest);
 }
