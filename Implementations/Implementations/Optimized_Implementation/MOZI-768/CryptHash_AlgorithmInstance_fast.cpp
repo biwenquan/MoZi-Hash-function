@@ -397,10 +397,10 @@ extern "C" int hash_Fsponge(int hash,
 
     if (rate != 152 || hash != 96) {
         std::printf("Invalid rate or hash length\n");
-        return 1;
+        return -1;
     }
     if (output == nullptr || (input == nullptr && input_len_bits != 0)) {
-        return 1;
+        return -1;
     }
 
     State2048 state{};
@@ -443,5 +443,8 @@ extern "C" int CryptHash(int digest_len_bits,
                           const unsigned char *msg,
                           unsigned long long msg_len_bits,
                           unsigned char *digest) {
+   if(digest_len_bits != DIGEST_BIT_LENGTH) {
+        return -1;
+    }  
     return hash_Fsponge(digest_len_bits / 8, 152, msg, msg_len_bits, digest_len_bits, digest);
 }
